@@ -36,7 +36,7 @@ const strategies: MergeBaseStrategy<any>[] = [GithubStrategy, GitlabStrategy];
 async function getBaseScreenshotBucket(build: Build) {
   const richBuild = await build
     .$query()
-    .withGraphFetched("[project,compareScreenshotBucket]");
+    .withGraphFetched("[project,compareScreenshotBucket,pullRequest]");
 
   const project = richBuild.project;
   const compareScreenshotBucket = richBuild.compareScreenshotBucket;
@@ -60,7 +60,10 @@ async function getBaseScreenshotBucket(build: Build) {
   }
 
   const referenceBranch =
-    richBuild.referenceBranch ?? (await project.$getReferenceBranch());
+    richBuild.referenceBranch ??
+    richBuild.pullRequest?.baseRef ??
+    (await project.$getReferenceBranch());
+
   const base = referenceBranch;
   const head = compareScreenshotBucket.commit;
 
